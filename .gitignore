@@ -1,4 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# See https://help.github.com/articles/ignoring-files/
+
+# -----------------------------------------------------------------------------
+# Remote: https://github.com/chandan22468/Velocryft
+#   git remote add origin https://github.com/chandan22468/Velocryft.git
+#   git branch -M main && git push -u origin main
+# -----------------------------------------------------------------------------
 
 # dependencies
 /node_modules
@@ -19,19 +25,29 @@
 
 # production
 /build
+/dist
+
+# turbopack / tooling caches
+.turbo
 
 # misc
+*.zip
 .DS_Store
+Thumbs.db
+ehthumbs.db
 *.pem
 
-# debug
+# debug / logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
-# env files (can opt-in for committing if needed)
-.env*
+# env (secrets — never commit)
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +55,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# editors
+.idea/
+*.suo
+*.user
+*.userosscache
