@@ -23,26 +23,27 @@ export const HeroCopy = () => {
 
     gsap.set([intro, cta], { opacity: 1, y: 0 });
 
+    const narrow = window.matchMedia('(max-width: 768px)').matches;
+    const scrubLag = narrow ? 0.12 : 0.22;
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: parentContainer,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.55,
+        scrub: scrubLag,
       },
     });
 
-    // Intro copy eases out early so the car stays the hero while you keep scrolling.
     tl.to(
       intro,
-      { opacity: 0, y: -36, ease: 'power2.out', duration: 0.28 },
+      { opacity: 0, y: -28, ease: 'power2.out', duration: narrow ? 0.22 : 0.26 },
       0
     );
 
-    // CTA stays until the final moments of the hero track (fade only in the last ~4% of scroll).
     tl.to(
       cta,
-      { opacity: 0, y: 28, ease: 'power2.in', duration: 0.04 },
+      { opacity: 0, y: 20, ease: 'power2.in', duration: 0.04 },
       0.96
     );
 
@@ -64,36 +65,36 @@ export const HeroCopy = () => {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.15,
+        staggerChildren: 0.12,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 16 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: [0.25, 0.1, 0.25, 1] as const },
+      transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const },
     },
   };
 
   return (
     <div
       ref={rootRef}
-      className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none text-center px-4"
+      className="pointer-events-none absolute inset-0 z-10 flex flex-col px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[calc(4.5rem+env(safe-area-inset-top))] max-md:justify-between max-md:pt-[calc(4rem+env(safe-area-inset-top))] sm:justify-center sm:px-6 sm:pb-0 sm:pt-[calc(5rem+env(safe-area-inset-top))] md:pt-[calc(5.5rem+env(safe-area-inset-top))]"
     >
-      <div className="flex w-full max-w-4xl flex-col items-center gap-10">
+      <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-5 md:gap-10 max-md:mt-0">
         <motion.div
           ref={introRef}
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col items-center"
+          className="flex w-full flex-col items-center text-center"
         >
           <motion.h1
             variants={itemVariants}
-            className="text-[clamp(2.25rem,12vw,6rem)] md:text-8xl font-bold tracking-[0.12em] md:tracking-widest text-[#F5F5F0] mb-2 uppercase max-w-full"
+            className="mb-1 max-w-full text-[clamp(1.65rem,9.5vw,3.25rem)] font-bold uppercase leading-[1.05] tracking-[0.06em] text-[#F5F5F0] sm:tracking-widest md:mb-2 md:text-8xl md:tracking-widest"
             style={{ fontFamily: 'Inter, sans-serif' }}
           >
             VELOCRYFT
@@ -101,14 +102,14 @@ export const HeroCopy = () => {
 
           <motion.p
             variants={itemVariants}
-            className="text-xs sm:text-sm md:text-base tracking-[0.15em] md:tracking-[0.2em] text-[#C0392B] uppercase mb-6 px-1"
+            className="mb-3 max-w-88 px-1 text-[11px] uppercase leading-snug tracking-[0.12em] text-[#C0392B] sm:mb-6 sm:max-w-none sm:text-sm sm:tracking-[0.15em] md:text-base md:tracking-[0.2em]"
           >
             AUTOMOTIVE ART. REENGINEERED.
           </motion.p>
 
           <motion.p
             variants={itemVariants}
-            className="text-base md:text-xl text-[#CCCCCC] max-w-2xl font-light px-1 leading-snug md:leading-normal"
+            className="max-w-md px-0.5 text-sm font-light leading-snug text-[#CCCCCC] sm:max-w-2xl sm:px-1 sm:text-base sm:leading-snug md:text-xl md:leading-normal"
           >
             Limited edition framed automotive sculptures crafted for enthusiasts.
           </motion.p>
@@ -119,17 +120,17 @@ export const HeroCopy = () => {
           variants={itemVariants}
           initial="hidden"
           animate="visible"
-          className="pointer-events-auto flex w-full max-w-xl flex-col gap-4 rounded-2xl border border-white/10 bg-black/35 px-5 py-6 shadow-[0_8px_40px_rgba(0,0,0,0.45)] backdrop-blur-md sm:flex-row sm:justify-center sm:px-8 sm:py-6"
+          className="pointer-events-auto mt-auto flex w-full max-w-xl flex-col gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 py-4 shadow-[0_8px_40px_rgba(0,0,0,0.45)] backdrop-blur-md max-md:shrink-0 sm:flex-row sm:justify-center sm:gap-4 sm:px-8 sm:py-6"
         >
           <button
             type="button"
-            className="px-8 py-4 bg-[#F5F5F0] text-[#0A0A0A] uppercase tracking-wider text-sm font-semibold transition-transform duration-300 ease-out hover:scale-[1.02] hover:shadow-lg"
+            className="min-h-12 w-full rounded-sm bg-[#F5F5F0] px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[#0A0A0A] transition-transform duration-200 ease-out active:scale-[0.99] sm:min-h-0 sm:w-auto sm:px-8 sm:py-4 sm:text-sm md:hover:scale-[1.02] md:hover:shadow-lg"
           >
             Explore Collection
           </button>
           <button
             type="button"
-            className="px-8 py-4 border border-[#CCCCCC] text-[#F5F5F0] uppercase tracking-wider text-sm font-semibold transition-all duration-300 ease-out hover:bg-[#111111] hover:scale-[1.02]"
+            className="min-h-12 w-full rounded-sm border border-[#CCCCCC] px-5 py-3.5 text-xs font-semibold uppercase tracking-wider text-[#F5F5F0] transition-all duration-200 ease-out active:scale-[0.99] sm:min-h-0 sm:w-auto sm:px-8 sm:py-4 sm:text-sm md:hover:scale-[1.02] md:hover:bg-[#111111]"
           >
             View Motion Series
           </button>

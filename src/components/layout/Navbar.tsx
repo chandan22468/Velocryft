@@ -33,9 +33,9 @@ export const Navbar = () => {
     <>
       <nav 
         ref={navRef} 
-        className="fixed top-0 left-0 w-full z-40 px-6 py-6 transition-colors duration-400 ease-in-out border-b border-transparent data-[scrolled=true]:border-[#1A1A1A]"
+        className="fixed left-0 top-0 z-40 w-full border-b border-transparent px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))] transition-colors duration-400 ease-in-out data-[scrolled=true]:border-[#1A1A1A] sm:px-6 sm:py-6 sm:pt-[max(1.5rem,env(safe-area-inset-top))]"
       >
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
           <Link 
             href="/" 
             className="text-xl md:text-2xl font-bold tracking-[0.25em] text-[#F5F5F0] uppercase z-50 relative"
@@ -75,7 +75,7 @@ export const Navbar = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 bg-[#0A0A0A] z-30 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-30 flex flex-col items-center justify-center bg-[#0A0A0A] pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
           >
             <div className="flex flex-col items-center gap-8">
               {links.map((link, i) => (

@@ -17,7 +17,7 @@ const TRIM_END = 10;
 export const HeroCanvas = ({ framesRef, totalFrames, progressRef, isReady }: HeroCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useMouseParallax<HTMLDivElement>();
-  
+
   const displayFrameRef = useRef(0);
   const drawnFrameRef = useRef(-1);
 
@@ -27,12 +27,13 @@ export const HeroCanvas = ({ framesRef, totalFrames, progressRef, isReady }: Her
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     let animationFrameId: number;
     let width = window.innerWidth;
     let height = window.innerHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
     let rafRunning = false;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -40,27 +41,33 @@ export const HeroCanvas = ({ framesRef, totalFrames, progressRef, isReady }: Her
     const hasTrim = totalFrames > TRIM_START + TRIM_END;
     const firstUsable = hasTrim ? TRIM_START : 0;
     const lastUsable = hasTrim ? totalFrames - 1 - TRIM_END : totalFrames - 1;
-    const usableCount = Math.max(1, lastUsable - firstUsable + 1);
 
     displayFrameRef.current = firstUsable;
     drawnFrameRef.current = -1;
 
+    const applyCanvasSize = (w: number, h: number) => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = w;
+      height = h;
+      canvas.width = Math.max(1, Math.floor(w * dpr));
+      canvas.height = Math.max(1, Math.floor(h * dpr));
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+      drawnFrameRef.current = -1;
+    };
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        width = entry.contentRect.width;
-        height = entry.contentRect.height;
-        canvas.width = width;
-        canvas.height = height;
-        // Force redraw on resize
-        drawnFrameRef.current = -1;
+        applyCanvasSize(entry.contentRect.width, entry.contentRect.height);
       }
     });
 
     resizeObserver.observe(canvas.parentElement!);
-    
-    // Initial size setup
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+
+    const parent = canvas.parentElement!;
+    applyCanvasSize(parent.clientWidth, parent.clientHeight);
 
     const render = () => {
       if (document.visibilityState === 'hidden') {
@@ -70,11 +77,9 @@ export const HeroCanvas = ({ framesRef, totalFrames, progressRef, isReady }: Her
 
       const t = Math.min(1, Math.max(0, progressRef.current));
       const targetFloat =
-        usableCount <= 1
-          ? firstUsable
-          : firstUsable + t * (lastUsable - firstUsable);
+        lastUsable <= firstUsable ? firstUsable : firstUsable + t * (lastUsable - firstUsable);
 
-      const lerp = reducedMotion.matches ? 1 : 0.22;
+      const lerp = reducedMotion.matches ? 1 : 0.42;
 
       displayFrameRef.current += (targetFloat - displayFrameRef.current) * lerp;
 
@@ -82,18 +87,17 @@ export const HeroCanvas = ({ framesRef, totalFrames, progressRef, isReady }: Her
         lastUsable,
         Math.max(firstUsable, Math.round(displayFrameRef.current))
       );
-      
+
       if (currentFrame !== drawnFrameRef.current && framesRef.current[currentFrame]) {
-        // Draw image cover style (aspect fill)
         const img = framesRef.current[currentFrame];
         const canvasRatio = width / height;
         const imgRatio = img.width / img.height;
-        
+
         let drawWidth = width;
         let drawHeight = height;
         let offsetX = 0;
         let offsetY = 0;
-        
+
         if (canvasRatio > imgRatio) {
           drawHeight = width / imgRatio;
           offsetY = (height - drawHeight) / 2;
@@ -142,14 +146,14 @@ export const HeroCanvas = ({ framesRef, totalFrames, progressRef, isReady }: Her
   }, [isReady, totalFrames, framesRef, progressRef]);
 
   return (
-    <div 
-      ref={containerRef} 
-      className="absolute inset-0 w-full h-full will-change-transform transform-[translateZ(0)]"
+    <div
+      ref={containerRef}
+      className="absolute inset-0 h-full w-full will-change-transform transform-[translateZ(0)]"
     >
       <canvas
         ref={canvasRef}
-        className="w-full h-full block"
-        style={{ imageRendering: 'crisp-edges' }}
+        className="block h-full w-full"
+        style={{ imageRendering: 'auto' }}
       />
     </div>
   );

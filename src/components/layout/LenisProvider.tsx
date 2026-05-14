@@ -10,35 +10,73 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const LenisProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
-    const lenis = new Lenis({
-      lerp: 0.1,
-      wheelMultiplier: 1,
-      smoothWheel: true,
-      syncTouch: true,
-      touchMultiplier: 1,
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-    });
+    const mmNarrow = window.matchMedia('(max-width: 768px)');
+    const mmReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    lenis.on('scroll', ScrollTrigger.update);
+    let lenis: Lenis | null = null;
+    let onRaf: ((time: number) => void) | null = null;
 
-    const onRaf = (time: number) => {
-      lenis.raf(time * 1000);
+    const onScrollNative = () => {
+      ScrollTrigger.update();
     };
-    gsap.ticker.add(onRaf);
-    gsap.ticker.lagSmoothing(0);
+
+    const teardownLenis = () => {
+      if (onRaf) {
+        gsap.ticker.remove(onRaf);
+        onRaf = null;
+      }
+      if (lenis) {
+        lenis.destroy();
+        lenis = null;
+      }
+    };
+
+    const apply = () => {
+      window.removeEventListener('scroll', onScrollNative);
+      teardownLenis();
+
+      const useNative = mmNarrow.matches || mmReduce.matches;
+
+      if (useNative) {
+        window.addEventListener('scroll', onScrollNative, { passive: true });
+      } else {
+        lenis = new Lenis({
+          lerp: 0.22,
+          wheelMultiplier: 1.2,
+          smoothWheel: true,
+          syncTouch: false,
+          touchMultiplier: 1,
+          orientation: 'vertical',
+          gestureOrientation: 'vertical',
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+
+        onRaf = (time: number) => {
+          lenis!.raf(time * 1000);
+        };
+        gsap.ticker.add(onRaf);
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      ScrollTrigger.refresh();
+    };
+
+    apply();
+    mmNarrow.addEventListener('change', apply);
+    mmReduce.addEventListener('change', apply);
 
     const onResize = () => {
       ScrollTrigger.refresh();
     };
     window.addEventListener('resize', onResize);
 
-    ScrollTrigger.refresh();
-
     return () => {
+      mmNarrow.removeEventListener('change', apply);
+      mmReduce.removeEventListener('change', apply);
       window.removeEventListener('resize', onResize);
-      lenis.destroy();
-      gsap.ticker.remove(onRaf);
+      window.removeEventListener('scroll', onScrollNative);
+      teardownLenis();
     };
   }, []);
 
